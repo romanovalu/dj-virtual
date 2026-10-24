@@ -135,16 +135,16 @@ export function defaultMapping(): Binding[] {
       { action: `${d}.hotcue2`, kind: 'note', channel: pads, number: 2, led: true },
       { action: `${d}.hotcue3`, kind: 'note', channel: pads, number: 3, led: true },
       { action: `${d}.hotcue4`, kind: 'note', channel: pads, number: 4, led: true },
-      { action: `${d}.loopIn`, kind: 'note', channel: pads, number: 17, led: true, inferred: true },
-      { action: `${d}.loopOut`, kind: 'note', channel: pads, number: 18, led: true, inferred: true },
+      { action: `${d}.loopIn`, kind: 'note', channel: pads, number: 17, led: true },
+      { action: `${d}.loopOut`, kind: 'note', channel: pads, number: 18, led: true },
       { action: `${d}.loopHalf`, kind: 'note', channel: pads, number: 19, led: true, inferred: true },
       { action: `${d}.loopDouble`, kind: 'note', channel: pads, number: 20, led: true, inferred: true },
-      // Modo sampler de los pads (el .tsi sugería "sampler o loop in/out"): Deck A = 1-4, Deck B = 5-8
-      ...[0, 1, 2, 3].map((k) => ({ action: `M.sample${k + 1 + (d === 'B' ? 4 : 0)}` as ActionId, kind: 'note' as const, channel: pads, number: 33 + k, led: true, inferred: true })),
-      { action: `${d}.fx1`, kind: 'note', channel: pads, number: 49, led: true, inferred: true },
-      { action: `${d}.fx2`, kind: 'note', channel: pads, number: 50, led: true, inferred: true },
-      { action: `${d}.fx3`, kind: 'note', channel: pads, number: 51, led: true, inferred: true },
-      { action: `${d}.fx4`, kind: 'note', channel: pads, number: 52, led: true, inferred: true },
+      // Modo sampler de los pads (confirmado con el Monitor): Deck A = 1-4, Deck B = 5-8
+      ...[0, 1, 2, 3].map((k) => ({ action: `M.sample${k + 1 + (d === 'B' ? 4 : 0)}` as ActionId, kind: 'note' as const, channel: pads, number: 33 + k, led: true })),
+      { action: `${d}.fx1`, kind: 'note', channel: pads, number: 49, led: true },
+      { action: `${d}.fx2`, kind: 'note', channel: pads, number: 50, led: true },
+      { action: `${d}.fx3`, kind: 'note', channel: pads, number: 51, led: true },
+      { action: `${d}.fx4`, kind: 'note', channel: pads, number: 52, led: true },
     );
   };
   deck('A', 1, 5);
@@ -154,7 +154,7 @@ export function defaultMapping(): Binding[] {
     { action: 'M.browsePush', kind: 'note', channel: 16, number: 6 },
     { action: 'A.load', kind: 'note', channel: 16, number: 2 },
     { action: 'B.load', kind: 'note', channel: 16, number: 3 },
-    { action: 'M.crossfader', kind: 'cc', channel: 16, number: 8, inferred: true },
+    { action: 'M.crossfader', kind: 'cc', channel: 16, number: 8 },
     { action: 'M.masterVolume', kind: 'cc', channel: 16, number: 10 },
     { action: 'M.cueMix', kind: 'cc', channel: 16, number: 12 },
   );
