@@ -415,3 +415,11 @@
     grid-template-columns: repeat(3, 1fr);
   }
 }
+
+.restore-bar {
+  margin: 8px 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}

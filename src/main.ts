@@ -15,9 +15,11 @@ import { drawOverview, drawZoom, type WaveMarks } from './ui/waveform';
 import { Guide } from './guide/guide';
 import { Sampler } from './audio/sampler';
 import { SamplerPads } from './ui/sampler-pads';
+import { registerPwa } from './pwa';
 import { EasyView } from './ui/easy';
 import { GuidePanel } from './ui/guide-panel';
 import type { App, AppMode } from './app-types';
+import { fileKey, filesInDir, fsSupported, hasPermission, hiddenKeys, hideKey, listEntries, pickFiles, pickFolder, putEntry, removeEntry, unhideKey } from './persist';
 
 const $ = <T extends HTMLElement = HTMLElement>(sel: string, root: ParentNode = document) => root.querySelector(sel) as T;
 const $$ = <T extends HTMLElement = HTMLElement>(sel: string, root: ParentNode = document) => [...root.querySelectorAll(sel)] as T[];
@@ -160,18 +162,162 @@ async function loadInto(d: Deck, t: Track | undefined): Promise<void> {
 
 // ------------------------------------------------------------------ biblioteca
 
-function addFiles(files: Iterable<File>): void {
+/** Agrega archivos a la biblioteca, sin duplicar. Devuelve cuántos temas nuevos entraron. */
+function addTrackFiles(items: { file: File; storeKey?: string }[], silent = false): number {
+  const have = new Set(tracks.map((t) => t.fileKey).filter(Boolean));
+  const hidden = hiddenKeys();
   let n = 0;
-  for (const f of files) {
+  let dup = 0;
+  for (const { file: f, storeKey } of items) {
     if (!isAudioFile(f)) continue;
-    const t: Track = { id: newTrackId(), title: titleFromFile(f.name), source: 'local', file: f, duration: 0, status: 'pending' };
+    const k = fileKey(f);
+    if (have.has(k)) {
+      dup++;
+      continue;
+    }
+    if (storeKey?.startsWith('d:') && hidden.has(k)) continue;
+    have.add(k);
+    const t: Track = { id: newTrackId(), title: titleFromFile(f.name), source: 'local', file: f, fileKey: k, storeKey, duration: 0, status: 'pending' };
     tracks.push(t);
     analyzer.enqueue(t);
     n++;
   }
-  if (n) toast(`${n} tema${n > 1 ? 's' : ''} agregado${n > 1 ? 's' : ''}: analizando…`);
-  else toast('No encontré archivos de audio (MP3, WAV, FLAC…).');
+  if (!silent) {
+    if (n) toast(`${n} tema${n > 1 ? 's' : ''} agregado${n > 1 ? 's' : ''}: analizando…${dup ? ` (${dup} ya estaban)` : ''}`);
+    else if (dup) toast('Esos temas ya estaban en la biblioteca.');
+    else toast('No encontré archivos de audio (MP3, WAV, FLAC…).');
+  }
   renderLibrary();
+  scheduleRender('easy');
+  return n;
+}
+
+/** Archivos sin acceso guardado (navegadores sin File System Access): no se recuerdan. */
+function addFiles(files: Iterable<File>): void {
+  addTrackFiles([...files].map((file) => ({ file })));
+}
+
+async function addFileHandles(handles: FileSystemFileHandle[]): Promise<void> {
+  const items: { file: File; storeKey: string }[] = [];
+  for (const h of handles) {
+    try {
+      const f = await h.getFile();
+      if (!isAudioFile(f)) continue;
+      const key = `f:${fileKey(f)}`;
+      unhideKey(fileKey(f));
+      await putEntry({ key, kind: 'file', name: f.name, handle: h, addedAt: Date.now() });
+      items.push({ file: f, storeKey: key });
+    } catch {
+      /* archivo ilegible */
+    }
+  }
+  addTrackFiles(items);
+}
+
+async function addDirectory(dir: FileSystemDirectoryHandle): Promise<void> {
+  let key = `d:${dir.name}:${Date.now()}`;
+  for (const e of await listEntries()) {
+    if (e.kind === 'dir' && (await e.handle.isSameEntry(dir))) key = e.key;
+  }
+  await putEntry({ key, kind: 'dir', name: dir.name, handle: dir, addedAt: Date.now() });
+  toast(`Leyendo la carpeta "${dir.name}"…`);
+  const items = await filesInDir(dir);
+  const n = addTrackFiles(
+    items.map((x) => ({ file: x.file, storeKey: key })),
+    true,
+  );
+  toast(n ? `Carpeta "${dir.name}": ${n} temas nuevos. Queda guardada; lo que agregues ahí aparece solo.` : `La carpeta "${dir.name}" no tiene temas nuevos.`);
+}
+
+async function chooseFiles(): Promise<void> {
+  if (!fsSupported) {
+    $<HTMLInputElement>('#file-input').click();
+    return;
+  }
+  try {
+    await addFileHandles(await pickFiles());
+  } catch {
+    /* canceló */
+  }
+}
+
+async function chooseFolder(): Promise<void> {
+  if (!fsSupported) {
+    toast('Tu navegador no deja elegir carpetas: usá Chrome o Edge.');
+    return;
+  }
+  try {
+    await addDirectory(await pickFolder());
+  } catch {
+    /* canceló */
+  }
+}
+
+function removeTrack(t: Track): void {
+  if ([decks.A, decks.B].some((d) => d.track === t && d.playing)) {
+    toast('Ese tema está sonando: pausalo antes de sacarlo.');
+    return;
+  }
+  const i = tracks.indexOf(t);
+  if (i >= 0) tracks.splice(i, 1);
+  autodj.removeFromQueue(t);
+  const k = t.storeKey;
+  if (k?.startsWith('d:') && t.fileKey) hideKey(t.fileKey);
+  else if (k) void removeEntry(k);
+  if (selected >= tracks.length) selected = Math.max(0, tracks.length - 1);
+  renderLibrary();
+  scheduleRender('easy');
+}
+
+// ------------------------------------------------------------------ restaurar la biblioteca guardada
+
+let restorePending = 0;
+
+async function restoreLibrary(ask: boolean): Promise<void> {
+  const entries = await listEntries();
+  let pending = 0;
+  let missing = 0;
+  let fileEntries = 0;
+  for (const e of entries) {
+    if (e.kind === 'yt') {
+      if (!tracks.some((t) => t.storeKey === e.key)) tracks.push({ id: newTrackId(), title: e.name, source: 'youtube', youtubeId: e.videoId, storeKey: e.key, duration: 0, status: 'ready' });
+      continue;
+    }
+    if (e.kind === 'file') fileEntries++;
+    let ok = false;
+    try {
+      ok = await hasPermission(e.handle, ask);
+    } catch {
+      ok = false;
+    }
+    if (!ok) {
+      pending++;
+      continue;
+    }
+    try {
+      if (e.kind === 'file') addTrackFiles([{ file: await e.handle.getFile(), storeKey: e.key }], true);
+      else
+        addTrackFiles(
+          (await filesInDir(e.handle)).map((x) => ({ file: x.file, storeKey: e.key })),
+          true,
+        );
+    } catch {
+      missing++;
+    }
+  }
+  restorePending = pending;
+  renderRestoreBar(fileEntries);
+  if (missing) toast(`${missing} archivo(s) guardados ya no están (¿los moviste o borraste?).`);
+  renderLibrary();
+  scheduleRender('easy');
+}
+
+function renderRestoreBar(fileEntries = 0): void {
+  const bar = $('#restore-bar');
+  bar.hidden = restorePending === 0;
+  if (!restorePending) return;
+  bar.innerHTML = `🎵 Tu biblioteca está guardada (${restorePending} ${restorePending === 1 ? 'fuente' : 'fuentes'} de música). El navegador pide permiso para volver a leerla. <button id="restore-btn" class="primary">🔓 Reconectar mi música</button>${fileEntries > 5 ? ' <span class="small muted">Tip: con "+ Carpeta" se reconecta todo de un solo click.</span>' : ''}`;
+  $('#restore-btn').addEventListener('click', () => void restoreLibrary(true));
 }
 
 function addYouTube(): void {
@@ -181,7 +327,11 @@ function addYouTube(): void {
     toast('No reconozco ese link de YouTube.');
     return;
   }
-  tracks.push({ id: newTrackId(), title: `YouTube · ${id}`, source: 'youtube', youtubeId: id, duration: 0, status: 'ready' });
+  const key = `y:${id}`;
+  if (!tracks.some((t) => t.storeKey === key)) {
+    tracks.push({ id: newTrackId(), title: `YouTube · ${id}`, source: 'youtube', youtubeId: id, storeKey: key, duration: 0, status: 'ready' });
+    void putEntry({ key, kind: 'yt', name: `YouTube · ${id}`, videoId: id, addedAt: Date.now() });
+  }
   input.value = '';
   select(tracks.length - 1);
   renderLibrary();
@@ -232,7 +382,7 @@ function renderLibrary(): void {
           <td>${a ? `<span class="ebar" title="${a.energy}/10"><i style="width:${a.energy * 10}%"></i></span>` : '—'}</td>
           <td class="mono small">${t.duration ? formatTime(t.duration) : '—'}</td>
           <td>${status(t)}</td>
-          <td style="white-space:nowrap"><button data-act="A">A</button> <button data-act="B">B</button> <button data-act="q" ${inQ ? 'disabled' : ''}>${inQ ? 'en cola' : '+ cola'}</button></td>
+          <td style="white-space:nowrap"><button data-act="A">A</button> <button data-act="B">B</button> <button data-act="q" ${inQ ? 'disabled' : ''}>${inQ ? 'en cola' : '+ cola'}</button> <button data-act="rm" title="Sacar de la biblioteca">✕</button></td>
         </tr>`;
       })
       .join('');
@@ -245,6 +395,10 @@ $('#lib-table').addEventListener('click', (e) => {
   const act = (e.target as HTMLElement).closest('button')?.dataset.act;
   if (act === 'A' || act === 'B') void loadInto(decks[act], tracks[i]);
   else if (act === 'q') autodj.addToQueue(tracks[i]);
+  else if (act === 'rm') {
+    removeTrack(tracks[i]);
+    return;
+  }
   select(i);
 });
 $('#lib-table').addEventListener('dblclick', (e) => {
@@ -281,9 +435,25 @@ window.addEventListener('drop', (e) => {
   e.preventDefault();
   dragDepth = 0;
   document.body.classList.remove('dragging');
-  if (e.dataTransfer?.files.length) addFiles(e.dataTransfer.files);
+  // Con File System Access guardamos el acceso (archivos o carpetas enteras) para la próxima vez.
+  const items = [...(e.dataTransfer?.items ?? [])].filter((i) => i.kind === 'file');
+  const getters = items.map((i) => (i as DataTransferItem & { getAsFileSystemHandle?(): Promise<FileSystemHandle | null> }).getAsFileSystemHandle?.());
+  if (fsSupported && getters.length && getters.every(Boolean)) {
+    void Promise.all(getters as Promise<FileSystemHandle | null>[]).then(async (hs) => {
+      const files = hs.filter((h): h is FileSystemFileHandle => h?.kind === 'file');
+      const dirs = hs.filter((h): h is FileSystemDirectoryHandle => h?.kind === 'directory');
+      if (files.length) await addFileHandles(files);
+      for (const d of dirs) await addDirectory(d);
+    });
+  } else if (e.dataTransfer?.files.length) addFiles(e.dataTransfer.files);
   else renderLibrary();
 });
+$('#lib-files').addEventListener('click', (e) => {
+  if (!fsSupported || (e.target as HTMLElement).id === 'file-input') return; // sigue el input clásico
+  e.preventDefault();
+  void chooseFiles();
+});
+$('#lib-folder').addEventListener('click', () => void chooseFolder());
 
 // ------------------------------------------------------------------ controles de deck
 
@@ -872,7 +1042,7 @@ function fillQueue(onlyAnalyzed = false): number {
 }
 
 const guide = new Guide(autodj, mixer, controller, sampler);
-const app: App = { engine, decks, mixer, autodj, controller, guide, sampler, tracks, addFiles, toast, resumeAudio, fillQueue };
+const app: App = { engine, decks, mixer, autodj, controller, guide, sampler, tracks, addFiles, chooseFiles, chooseFolder, toast, resumeAudio, fillQueue };
 const easy = new EasyView(app, $('#easy'));
 new GuidePanel(app, $('#guide'));
 
@@ -940,13 +1110,15 @@ async function boot(): Promise<void> {
   renderLibrary();
   renderAutoDJ();
   renderMidi();
+  void restoreLibrary(false);
   hideOverlayIfRunning();
   requestAnimationFrame(frame);
   await controller.init();
   renderMidi();
 }
 
+registerPwa($('#btn-install'));
 void boot();
 
 // Para depurar desde la consola
-Object.assign(window, { dj: { engine, decks, mixer, autodj, controller, tracks, addFiles, guide, setMode, sampler } });
+Object.assign(window, { dj: { engine, decks, mixer, autodj, controller, tracks, addFiles, guide, setMode, sampler, addDirectory, restoreLibrary } });

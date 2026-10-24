@@ -116,7 +116,8 @@ export class EasyView {
             <div class="lbl" style="margin-top:8px">Curva de energía <span class="muted small">— arrastrá los puntos</span></div>
             <svg id="e-curve" viewBox="0 0 300 120" preserveAspectRatio="none"></svg>
             <div class="row"><button id="e-build" class="primary">✨ Armar el set</button>
-              <label class="filebtn small">+ Temas<input type="file" id="e-files" accept="audio/*,.mp3,.wav,.flac,.ogg,.m4a" multiple hidden /></label>
+              <label class="filebtn small" id="e-files-btn">+ Temas<input type="file" id="e-files" accept="audio/*,.mp3,.wav,.flac,.ogg,.m4a" multiple hidden /></label>
+              <button class="small" id="e-folder" title="Tu carpeta de música queda guardada">+ Carpeta</button>
               <input type="url" id="e-yt" placeholder="o pegá un link de YouTube" style="flex:1;min-width:120px" />
             </div>
           </div>
@@ -203,6 +204,12 @@ export class EasyView {
       ad.applyCurve(this.curve);
       app.toast('Set armado siguiendo tu curva de energía.');
     });
+    $('#e-files-btn').addEventListener('click', (e) => {
+      if (!('showOpenFilePicker' in window) || (e.target as HTMLElement).id === 'e-files') return;
+      e.preventDefault();
+      void app.chooseFiles();
+    });
+    $('#e-folder').addEventListener('click', () => void app.chooseFolder());
     ($('#e-files') as HTMLInputElement).addEventListener('change', (e) => {
       const input = e.target as HTMLInputElement;
       if (input.files) app.addFiles(input.files);

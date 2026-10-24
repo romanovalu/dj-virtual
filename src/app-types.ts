@@ -20,6 +20,9 @@ export interface App {
   sampler: Sampler;
   tracks: Track[];
   addFiles(files: Iterable<File>): void;
+  /** Elegir archivos / carpeta y recordarlos (Chrome / Edge). */
+  chooseFiles(): Promise<void>;
+  chooseFolder(): Promise<void>;
   toast(msg: string): void;
   resumeAudio(): void;
   /** Llena la cola con todos los temas utilizables que no estén sonando ni preparados. */

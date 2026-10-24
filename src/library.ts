@@ -42,6 +42,10 @@ export interface Track {
   source: 'local' | 'youtube';
   file?: File;
   youtubeId?: string;
+  /** name|size|lastModified, para no duplicar archivos. */
+  fileKey?: string;
+  /** Entrada de la biblioteca guardada de la que viene (archivo, carpeta o link). */
+  storeKey?: string;
   duration: number;
   status: TrackStatus;
   error?: string;

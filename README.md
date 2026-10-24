@@ -2,6 +2,10 @@
 
 DJ virtual en el navegador (Vite + TypeScript + Web Audio) controlado con un **Numark DJ2GO2** por Web MIDI, con Auto-DJ que analiza y mezcla temas locales con beatmatching.
 
+## Online
+
+La app se publica sola en **GitHub Pages** con cada push (`.github/workflows/pages.yml`: tests → build → deploy). Es instalable (PWA): en Chrome/Edge aparece **📲 Instalar** y queda como programa con ícono, que abre sin internet (salvo YouTube). Tu música nunca se sube: se lee de tu PC.
+
 ## Arrancar
 
 ```bash
@@ -33,6 +37,10 @@ En Modo Fácil el DJ2GO2 cambia de mapeo: crossfader = mezcla asistida, pads 1-4
 - **Auto-DJ**: ordena el set por BPM, Camelot y energía; mezcla en frases de 16 o 32 compases con arranque sincronizado al reloj de audio, corrección de fase continua, bass swap, crossfade y filtro pasa altos; después vuelve de a poco al BPM original del tema.
 - **Modo híbrido**: con el Auto-DJ prendido, tocar un deck (en el controlador o en pantalla) se lo saca a la IA; "Devolver a la IA" lo devuelve. Lo mismo para el crossfader.
 - **YouTube (modo básico)**: links con la IFrame Player API oficial. Volumen y crossfade con `setVolume`, tempo en los pasos que da YouTube, sin EQ, sin preescucha y sin BPM. En el Auto-DJ se mezclan con un crossfade de 12 s antes del final, sin beatmatching. No se descarga audio.
+
+## Biblioteca guardada
+
+Con **+ Carpeta**, **+ Archivos** o arrastrando archivos/carpetas, la app guarda el *acceso* (File System Access API de Chrome/Edge; no copia la música) y los links de YouTube. Al volver aparece "Reconectar mi música": un click y vuelve todo, con los análisis ya hechos. Las carpetas se releen en cada visita, así que lo que agregues ahí aparece solo. La ✕ de cada fila saca un tema de la biblioteca.
 
 ## MIDI
 

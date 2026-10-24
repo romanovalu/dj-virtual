@@ -1,4 +1,5 @@
 import './styles.css';
+import { registerPwa } from './pwa';
 import { MidiManager, type MidiMessage } from './midi/midi';
 import { actionLabel, bindingLabel, findBinding, hex, loadMapping, type Binding } from './midi/mapping';
 
@@ -166,4 +167,5 @@ window.addEventListener('beforeunload', () => ledBindings().forEach((b) => midi.
 
 renderMap();
 renderUnknown();
+registerPwa();
 void midi.init();

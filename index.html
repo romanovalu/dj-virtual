@@ -4,6 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DJ Virtual IA</title>
+    <meta name="description" content="DJ virtual con IA: Auto-DJ con beatmatching, modo fácil, lecciones y control con Numark DJ2GO2." />
+    <meta name="theme-color" content="#12151b" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" type="image/png" href="./icons/favicon-32.png" />
+    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
   </head>
   <body>
     <div id="app">
@@ -16,11 +21,13 @@
           <button data-mode="pro" title="Todos los controles">🎛 Pro</button>
         </div>
         <div class="spacer"></div>
+        <button id="btn-install" class="primary" hidden title="Instalala como programa: ícono en el escritorio y funciona sin internet">📲 Instalar</button>
         <button id="btn-learn">MIDI Learn</button>
         <button id="btn-audio">Salidas de audio</button>
         <a class="btnlink" href="./midi-monitor.html" target="_blank">Monitor MIDI ↗</a>
       </header>
       <div id="banners"></div>
+      <div id="restore-bar" class="banner ok restore-bar" hidden></div>
 
       <section id="easy" class="easy" hidden></section>
       <section id="guide" class="guide panel" hidden></section>
@@ -37,7 +44,8 @@
             <b>Biblioteca</b>
             <span class="muted small" id="lib-count"></span>
             <span class="spacer"></span>
-            <label class="filebtn">+ Archivos<input type="file" id="file-input" accept="audio/*,.mp3,.wav,.flac,.ogg,.m4a,.aac,.aiff" multiple hidden /></label>
+            <label class="filebtn" id="lib-files">+ Archivos<input type="file" id="file-input" accept="audio/*,.mp3,.wav,.flac,.ogg,.m4a,.aac,.aiff" multiple hidden /></label>
+            <button id="lib-folder" title="Elegí tu carpeta de música: queda guardada y lo que agregues aparece solo">+ Carpeta</button>
             <input type="url" id="yt-url" placeholder="Link de YouTube (modo básico)" />
             <button id="yt-add">Agregar</button>
           </div>
