@@ -35,6 +35,8 @@ export class DeckCore {
   roll = { on: false, start: 0, len: 0, pos: 0 };
   private brake = 0; // factor de freno (0 = sin freno)
   private spinT = -1; // frames transcurridos del backspin (-1 = apagado)
+  /** Scratch: con la mano sobre el jog, la velocidad sigue a la mano (puede ser negativa o 0). */
+  scratch = { on: false, target: 0, rate: 0 };
   private st: SoundTouch;
   private stretching = false;
   private readPos = 0; // frames ya entregados a SoundTouch
@@ -102,6 +104,12 @@ export class DeckCore {
     this.roll.on = false;
   }
 
+  setScratch(on: boolean, target = 0): void {
+    if (on && !this.scratch.on) this.scratch.rate = this.playing ? this.rate : 0;
+    this.scratch.on = on;
+    this.scratch.target = target;
+  }
+
   setTempo(t: number): void {
     this.tempo = t;
   }
@@ -141,7 +149,14 @@ export class DeckCore {
   render(outL: Float32Array, outR: Float32Array, n: number, currentFrame: number): boolean {
     outL.fill(0, 0, n);
     outR.fill(0, 0, n);
-    if (!this.playing || !this.length) return false;
+    if (!this.length) return false;
+    if (this.scratch.on) {
+      // El scratch suena aunque el deck esté en pausa (como un vinilo).
+      this.stretching = false;
+      this.renderScratch(outL, outR, n);
+      return false;
+    }
+    if (!this.playing) return false;
 
     let offset = 0;
     if (this.startAtFrame >= 0) {
@@ -199,6 +214,25 @@ export class DeckCore {
       r.pos += rate;
     }
     this.advance(count * rate);
+  }
+
+  private renderScratch(outL: Float32Array, outR: Float32Array, n: number): void {
+    const s = this.scratch;
+    // La velocidad se acerca al objetivo con ~8 ms de inercia (suena a disco, no a escalones).
+    const k = 1 - Math.exp(-1 / (0.008 * this.sampleRate));
+    let pos = this.playhead;
+    const last = this.length - 2;
+    for (let i = 0; i < n; i++) {
+      s.rate += (s.target - s.rate) * k;
+      if (pos < 0) pos = 0;
+      if (pos > last) pos = last;
+      const i0 = Math.floor(pos);
+      const fr = pos - i0;
+      outL[i] = this.left[i0] + (this.left[i0 + 1] - this.left[i0]) * fr;
+      outR[i] = this.right[i0] + (this.right[i0 + 1] - this.right[i0]) * fr;
+      pos += s.rate;
+    }
+    this.playhead = Math.max(0, Math.min(last, pos));
   }
 
   private renderSpin(outL: Float32Array, outR: Float32Array, offset: number, count: number): void {

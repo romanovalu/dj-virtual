@@ -918,6 +918,27 @@ $('#learn-reset').addEventListener('click', () => {
   if (confirm('¿Volver al mapeo por defecto? Se pierden los controles aprendidos.')) controller.resetMapping();
 });
 $('#pitch-invert').addEventListener('change', (e) => controller.setPitchInvert((e.target as HTMLInputElement).checked));
+
+// Sensibilidad del scratch: ticks del jog por segundo que equivalen a velocidad normal (escala logarítmica).
+const SCRATCH_KEY = 'djv.scratchSens';
+const sensToTps = (v: number) => 600 * Math.pow(60 / 600, v); // 0 → 600 (menos), 1 → 60 (más)
+let scratchSens = 0.56;
+try {
+  scratchSens = Number(localStorage.getItem(SCRATCH_KEY) ?? scratchSens);
+} catch {
+  /* ignorar */
+}
+Deck.scratchTicksPerSecond = sensToTps(scratchSens);
+$<HTMLInputElement>('#scratch-sens').value = String(scratchSens);
+$('#scratch-sens').addEventListener('input', (e) => {
+  const v = Number((e.target as HTMLInputElement).value);
+  Deck.scratchTicksPerSecond = sensToTps(v);
+  try {
+    localStorage.setItem(SCRATCH_KEY, String(v));
+  } catch {
+    /* ignorar */
+  }
+});
 $('#dlg-learn').addEventListener('close', () => controller.startLearn(null));
 $$('dialog [data-close]').forEach((b) => b.addEventListener('click', () => (b.closest('dialog') as HTMLDialogElement).close()));
 

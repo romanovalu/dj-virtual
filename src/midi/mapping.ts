@@ -23,6 +23,7 @@ const DECK_ACTION_NAMES = [
   'sync',
   'pfl',
   'jog',
+  'jogTouch',
   'pitch',
   'volume',
   'hotcue1',
@@ -69,6 +70,7 @@ const DECK_LABELS: Record<DeckActionName, string> = {
   sync: 'Sync',
   pfl: 'Auriculares (PFL)',
   jog: 'Jog wheel',
+  jogTouch: 'Jog: tacto (scratch)',
   pitch: 'Pitch fader',
   volume: 'Nivel del canal',
   hotcue1: 'Hot cue 1',
@@ -125,8 +127,10 @@ export function defaultMapping(): Binding[] {
       { action: `${d}.sync`, kind: 'note', channel: ch, number: 2, led: true },
       { action: `${d}.pfl`, kind: 'note', channel: ch, number: 27, led: true },
       { action: `${d}.jog`, kind: 'cc', channel: ch, number: 6, relative: true },
+      // DJ2GO2 Touch: el jog es sensible al tacto (nota 6: 127 al tocar, 0 al soltar)
+      { action: `${d}.jogTouch`, kind: 'note', channel: ch, number: 6 },
       { action: `${d}.pitch`, kind: 'cc', channel: ch, number: 9 },
-      { action: `${d}.volume`, kind: 'cc', channel: ch, number: 22, inferred: true },
+      { action: `${d}.volume`, kind: 'cc', channel: ch, number: 22 },
       { action: `${d}.hotcue1`, kind: 'note', channel: pads, number: 1, led: true },
       { action: `${d}.hotcue2`, kind: 'note', channel: pads, number: 2, led: true },
       { action: `${d}.hotcue3`, kind: 'note', channel: pads, number: 3, led: true },
@@ -151,8 +155,8 @@ export function defaultMapping(): Binding[] {
     { action: 'A.load', kind: 'note', channel: 16, number: 2 },
     { action: 'B.load', kind: 'note', channel: 16, number: 3 },
     { action: 'M.crossfader', kind: 'cc', channel: 16, number: 8, inferred: true },
-    { action: 'M.masterVolume', kind: 'cc', channel: 16, number: 10, inferred: true },
-    { action: 'M.cueMix', kind: 'cc', channel: 16, number: 12, inferred: true },
+    { action: 'M.masterVolume', kind: 'cc', channel: 16, number: 10 },
+    { action: 'M.cueMix', kind: 'cc', channel: 16, number: 12 },
   );
   return out;
 }

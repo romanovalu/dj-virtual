@@ -320,8 +320,45 @@ export class Deck {
   }
 
   /** Jog: sonando hace pitch bend; pausado mueve la posición. */
+  /** DJ2GO2 Touch: mano sobre el jog = modo scratch; al soltar sigue como estaba. */
+  jogTouch(on: boolean): void {
+    if (this.mode !== 'local') return;
+    this.touching = on;
+    this.scratchTicks = 0;
+    this.send({ type: 'scratch', on, rate: 0 });
+    clearInterval(this.scratchTimer);
+    this.scratchTimer = 0;
+    if (on) {
+      this.lastScratchAt = performance.now();
+      // Cada 20 ms convertimos los "ticks" del jog en velocidad; sin movimiento, el disco se frena.
+      this.scratchTimer = window.setInterval(() => {
+        const now = performance.now();
+        const dt = Math.max(1, now - this.lastScratchAt) / 1000;
+        this.lastScratchAt = now;
+        const rate = (this.scratchTicks / dt) / Deck.scratchTicksPerSecond;
+        this.scratchTicks = 0;
+        this.send({ type: 'scratch', on: true, rate: Math.max(-6, Math.min(6, rate)) });
+      }, 20);
+    } else {
+      // Al soltar, re-sincronizamos la posición que ve la interfaz.
+      this.rep = { pos: this.rep.pos, time: this.engine.ctx.currentTime, rate: this.playing ? this.tempo : 0 };
+    }
+    this.emit();
+  }
+
+  /** Ticks del jog por segundo que equivalen a velocidad normal (se ajusta en MIDI Learn). */
+  static scratchTicksPerSecond = 220;
+  touching = false;
+  private scratchTicks = 0;
+  private scratchTimer = 0;
+  private lastScratchAt = 0;
+
   jog(delta: number): void {
     if (!this.loaded) return;
+    if (this.touching && this.mode === 'local') {
+      this.scratchTicks += delta;
+      return;
+    }
     if (this.mode === 'youtube') {
       if (!this.playing) this.seek(this.position() + delta * 0.05);
       return;

@@ -237,6 +237,10 @@ export class Controller {
       case 'jog':
         d.jog(b.relative ? relativeDelta(m.value) : m.value - 64);
         break;
+      case 'jogTouch':
+        if (press) d.jogTouch(true);
+        else if (release) d.jogTouch(false);
+        break;
       case 'pitch': {
         let x = (m.value - 64) / 63.5;
         if (Math.abs(m.value - 64) <= 1) x = 0;

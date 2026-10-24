@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Estudio de transmisión</title>
+    <link rel="stylesheet" href="studio.css" />
+  </head>
+  <body>
+    <header class="top">
+      <div class="brand"><span class="dot"></span> Estudio</div>
+      <span id="midiChip" class="chip">DJ2GO2: buscando…</span>
+      <span id="serverChip" class="chip">Servidor…</span>
+      <div class="spacer"></div>
+      <button id="btnPhone" class="btn">Conectar celular</button>
+      <button id="btnRec" class="btn rec"><span class="led"></span> Grabar <span id="recTime" class="time"></span></button>
+      <button id="btnLive" class="btn live"><span class="led"></span> Salir al aire <span id="liveTime" class="time"></span></button>
+    </header>
+
+    <main>
+      <section class="monitors">
+        <div class="monitor">
+          <div class="mon-head"><span class="tag pv">VISTA PREVIA</span> <span id="pvName"></span></div>
+          <div id="pvWrap" class="screen"></div>
+        </div>
+        <div class="trans">
+          <button id="btnCut" class="btn big" title="Corte seco (Play A)">CORTE</button>
+          <button id="btnFade" class="btn big accent" title="Fundido (Play B)">FUNDIDO</button>
+          <label class="tbar-wrap" title="Palanca manual (crossfader)">
+            <input id="tbar" type="range" min="0" max="1000" value="0" orient="vertical" />
+          </label>
+        </div>
+        <div class="monitor">
+          <div class="mon-head"><span class="tag pg">AL AIRE</span> <span id="pgName"></span> <span id="liveStats" class="stats"></span></div>
+          <div id="pgWrap" class="screen"></div>
+        </div>
+      </section>
+
+      <section class="scenes">
+        <div id="sceneList" class="scene-list"></div>
+        <div class="scene-mode">
+          <label><input type="radio" name="sceneClick" value="fade" /> Tocar escena = al aire con fundido</label>
+          <label><input type="radio" name="sceneClick" value="preview" /> Tocar escena = vista previa</label>
+        </div>
+      </section>
+
+      <section class="panel">
+        <nav class="tabs">
+          <button data-tab="fuentes" class="on">Fuentes</button>
+          <button data-tab="escena">Escena</button>
+          <button data-tab="marcador">Marcador</button>
+          <button data-tab="graficos">Gráficos</button>
+          <button data-tab="audio">Audio</button>
+          <button data-tab="transmision">Transmisión</button>
+          <button data-tab="control">DJ2GO2</button>
+        </nav>
+
+        <div class="tab on" id="tab-fuentes">
+          <div class="row wrap">
+            <select id="camSelect"></select>
+            <button id="addCam" class="btn">+ Webcam</button>
+            <select id="micSelect"></select>
+            <button id="addMic" class="btn">+ Micrófono</button>
+            <button id="addScreen" class="btn">+ Pantalla o pestaña</button>
+            <label class="btn file">+ Imagen <input id="addImage" type="file" accept="image/*" hidden /></label>
+            <label class="btn file">+ Video <input id="addVideo" type="file" accept="video/*" hidden /></label>
+            <button id="addPhone" class="btn">+ Celular</button>
+          </div>
+          <p class="hint">Para sumar la música del DJ virtual: "+ Pantalla o pestaña" → elegí la pestaña del DJ virtual y tildá "Compartir audio de la pestaña".</p>
+          <div id="sourceList" class="source-list"></div>
+        </div>
+
+        <div class="tab" id="tab-escena">
+          <div id="sceneEditor"></div>
+        </div>
+
+        <div class="tab" id="tab-marcador">
+          <div class="score-grid">
+            <div class="team">
+              <input id="team0" class="team-name" />
+              <button id="pt0" class="btn huge">+ Punto</button>
+            </div>
+            <div class="team">
+              <input id="team1" class="team-name" />
+              <button id="pt1" class="btn huge">+ Punto</button>
+            </div>
+            <div class="score-side">
+              <div id="scoreText" class="score-text"></div>
+              <div class="row wrap">
+                <button id="scoreUndo" class="btn">Deshacer</button>
+                <button id="scoreServe" class="btn">Cambiar saque</button>
+                <button id="scoreNew" class="btn">Nuevo partido</button>
+              </div>
+              <label class="check"><input id="golden" type="checkbox" /> Punto de oro (40-40 se define en un punto)</label>
+              <button id="scoreToggle" class="btn toggle">Mostrar marcador</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab" id="tab-graficos">
+          <div class="cards">
+            <div class="card">
+              <h3>Zócalo (nombre en pantalla)</h3>
+              <input id="lowerTitle" placeholder="Nombre" />
+              <input id="lowerSub" placeholder="Cargo, tema o descripción" />
+              <div class="row">
+                <label>Color <input id="lowerColor" type="color" /></label>
+                <label>Se oculta a los <input id="lowerAuto" type="number" min="0" max="120" class="num" /> s</label>
+              </div>
+              <button id="lowerToggle" class="btn toggle">Mostrar zócalo</button>
+            </div>
+            <div class="card">
+              <h3>Logo</h3>
+              <label class="btn file">Elegir imagen <input id="logoFile" type="file" accept="image/*" hidden /></label>
+              <div class="row">
+                <label>Esquina
+                  <select id="logoCorner">
+                    <option value="tr">Arriba derecha</option>
+                    <option value="tl">Arriba izquierda</option>
+                    <option value="br">Abajo derecha</option>
+                    <option value="bl">Abajo izquierda</option>
+                  </select>
+                </label>
+                <label>Tamaño <input id="logoSize" type="range" min="4" max="30" /></label>
+              </div>
+              <button id="logoToggle" class="btn toggle">Mostrar logo</button>
+            </div>
+            <div class="card">
+              <h3>Texto que corre (zócalo inferior)</h3>
+              <input id="tickerText" placeholder="Ej.: Torneo de verano · Cancha 2 · Seguinos en @..." />
+              <button id="tickerToggle" class="btn toggle">Mostrar texto</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab" id="tab-audio">
+          <div id="mixer" class="mixer"></div>
+          <p class="hint">Si no ves un canal, la fuente no tiene sonido. Los celulares arrancan en silencio para evitar acoples. El sonido de la transmisión no sale por tus parlantes.</p>
+        </div>
+
+        <div class="tab" id="tab-transmision">
+          <div class="cards">
+            <div class="card">
+              <h3>Imagen de salida</h3>
+              <div class="row wrap">
+                <label>Calidad
+                  <select id="setRes">
+                    <option value="720">720p (recomendado)</option>
+                    <option value="1080">1080p</option>
+                  </select>
+                </label>
+                <label>Formato
+                  <select id="setVertical">
+                    <option value="0">Horizontal 16:9</option>
+                    <option value="1">Vertical 9:16</option>
+                  </select>
+                </label>
+                <label>Bitrate <input id="setKbps" type="number" min="1000" max="9000" step="250" class="num" /> kbps</label>
+              </div>
+              <p id="bwHint" class="hint"></p>
+            </div>
+            <div class="card wide">
+              <h3>Destinos</h3>
+              <div id="destList"></div>
+              <div class="row">
+                <select id="destPlatform"></select>
+                <button id="destAdd" class="btn">+ Agregar destino</button>
+              </div>
+            </div>
+            <div class="card wide">
+              <h3>Estado</h3>
+              <div id="streamState" class="hint"></div>
+              <pre id="streamLog" class="log"></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab" id="tab-control">
+          <p class="hint">Conectá la DJ2GO2 por USB y cerrá el DJ virtual (en Windows la controladora la usa una sola app a la vez).</p>
+          <table id="midiHelp" class="help"></table>
+        </div>
+      </section>
+    </main>
+
+    <dialog id="phoneDlg">
+      <h2>Sumar un celular como cámara</h2>
+      <ol>
+        <li>Conectá el celular a <b>la misma red WiFi</b> que esta PC.</li>
+        <li>Escaneá el código con la cámara del celular.</li>
+        <li>Va a aparecer un aviso de "conexión no privada": tocá <b>Avanzado → Continuar</b> (es tu propia PC).</li>
+        <li>Elegí la cámara trasera, ponelo horizontal y tocá <b>Conectar</b>.</li>
+      </ol>
+      <div id="qrList" class="qr-list"></div>
+      <form method="dialog"><button class="btn">Listo</button></form>
+    </dialog>
+
+    <div id="toast" class="toast"></div>
+    <script type="module" src="studio.js"></script>
+  </body>
+</html>

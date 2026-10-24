@@ -21,7 +21,8 @@ export type DeckCommand =
   | { type: 'loop'; on: boolean; start: number; end: number }
   | { type: 'brake' }
   | { type: 'spin' }
-  | { type: 'roll'; on: boolean; start: number; len: number };
+  | { type: 'roll'; on: boolean; start: number; len: number }
+  | { type: 'scratch'; on: boolean; rate: number };
 
 export type DeckReport =
   | { type: 'state'; pos: number; time: number; rate: number; playing: boolean }
@@ -74,6 +75,9 @@ class DeckProcessor extends AudioWorkletProcessor {
         break;
       case 'spin':
         c.startSpin();
+        break;
+      case 'scratch':
+        c.setScratch(cmd.on, cmd.rate);
         break;
       case 'roll':
         if (cmd.on) c.startRoll(cmd.start * sampleRate, cmd.len * sampleRate);

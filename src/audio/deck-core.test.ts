@@ -63,3 +63,18 @@ for (const tempo of [0.9, 0.94, 0.97, 0.99, 1.0, 1.01, 1.03, 1.06, 1.1]) {
   console.log(`backspin: quedó en pausa=${!core.playing} en ${(core.position / sr).toFixed(2)} s (retrocedió)`);
   if (core.playing || core.position / sr >= 7) process.exitCode = 1;
 }
+
+// Scratch: con la mano en el jog la velocidad sigue a la mano, aunque el deck esté en pausa.
+{
+  const core = new DeckCore(sr);
+  core.load(L, L);
+  core.seek(sr * 10);
+  const oL = new Float32Array(128);
+  const oR = new Float32Array(128);
+  core.setScratch(true, -1); // para atrás a velocidad normal
+  for (let b = 0; b < sr / 128; b++) core.render(oL, oR, 128, b * 128);
+  const back = core.position / sr;
+  core.setScratch(false);
+  console.log(`scratch: 1 s para atrás desde 10 s → ${back.toFixed(3)} s (esperado ≈ 9.0), sigue en pausa=${!core.playing}`);
+  if (Math.abs(back - 9) > 0.02 || core.playing) process.exitCode = 1;
+}
