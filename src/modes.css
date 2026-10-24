@@ -1,0 +1,417 @@
+/* ---------- Selector de modo ---------- */
+.modes {
+  display: flex;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-left: 6px;
+}
+.modes button {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 6px 12px;
+}
+.modes button.on {
+  background: #2a2245;
+  color: #e9ddff;
+  border: 0;
+}
+
+/* ---------- Resaltado de la guía ---------- */
+.guide-hl {
+  outline: 3px solid var(--ai) !important;
+  outline-offset: 3px;
+  border-radius: 8px;
+  animation: guidepulse 0.9s ease-in-out infinite;
+}
+@keyframes guidepulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(184, 140, 255, 0.55);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(184, 140, 255, 0);
+  }
+}
+.xf-wrap {
+  position: relative;
+  flex: 1;
+  display: flex;
+}
+.xf-wrap input {
+  flex: 1;
+}
+#xf-target {
+  position: absolute;
+  top: -6px;
+  bottom: -6px;
+  width: 4px;
+  margin-left: -2px;
+  background: var(--ai);
+  border-radius: 2px;
+  box-shadow: 0 0 10px var(--ai);
+  pointer-events: none;
+  transition: left 0.08s linear;
+}
+
+/* ---------- Panel de lecciones ---------- */
+.guide {
+  margin: 10px 16px 0;
+  border-color: #3a2d63;
+  background: linear-gradient(180deg, #1b1630, var(--panel));
+}
+.g-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.g-levels {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.g-levels button {
+  padding: 4px 10px;
+  font-size: 13px;
+}
+.g-levels button.on {
+  border-color: var(--ai);
+  background: #2a2245;
+}
+.g-body {
+  display: grid;
+  grid-template-columns: 110px 1fr auto;
+  gap: 14px;
+  align-items: start;
+  margin-top: 10px;
+}
+.g-count {
+  font-size: 34px;
+  font-weight: 800;
+  text-align: center;
+  color: var(--ai);
+  font-family: var(--mono);
+  min-height: 44px;
+  line-height: 1.1;
+}
+.g-count.now {
+  color: var(--ok);
+  font-size: 30px;
+}
+.g-text {
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.g-why {
+  color: #cdbcff;
+  margin-top: 4px;
+}
+.g-explain {
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 4px;
+}
+.g-steps {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--muted);
+}
+.g-steps li.active {
+  color: var(--text);
+}
+.g-steps li.ok {
+  color: var(--ok);
+}
+.g-result {
+  margin-top: 8px;
+  border: 1px solid #3a2d63;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #15121f;
+}
+.g-res-title {
+  font-size: 18px;
+  font-weight: 700;
+}
+.g-result ul {
+  margin: 6px 0;
+  padding-left: 18px;
+}
+
+/* ---------- Modo Fácil ---------- */
+.easy {
+  padding: 14px 16px 24px;
+}
+.easy-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(300px, 1fr);
+  gap: 14px;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+.easy-main,
+.easy-side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+.card .lbl,
+.hand .lbl {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.card.now {
+  border-color: #24476a;
+  background: linear-gradient(135deg, #13243a, var(--panel));
+}
+.e-title {
+  font-size: 26px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.card.next .e-title {
+  font-size: 19px;
+}
+.e-meta {
+  color: var(--muted);
+  margin-top: 2px;
+}
+.e-bar {
+  height: 6px;
+  background: #22262f;
+  border-radius: 3px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+.e-bar > div {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, var(--deck-a), var(--ai));
+}
+.e-explain {
+  min-height: 22px;
+  color: #cdbcff;
+  font-size: 14px;
+  padding: 0 4px;
+}
+.e-start button {
+  width: 100%;
+  font-size: 20px;
+  padding: 14px;
+  border-radius: 14px;
+}
+.intents {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+.intents button {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 8px;
+  border-radius: 14px;
+  font-size: 16px;
+}
+.intents button span {
+  font-size: 12px;
+  color: var(--muted);
+}
+.moments {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+}
+.moments button {
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 16px;
+  background: #241a2e;
+  border-color: #4a3360;
+}
+.hand {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px 16px;
+}
+.hand-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.hand-row input {
+  flex: 1;
+  accent-color: var(--ai);
+  height: 28px;
+}
+.chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.chips button.on {
+  border-color: var(--ai);
+  background: #2a2245;
+}
+#e-curve {
+  width: 100%;
+  height: 120px;
+  background: #0f1117;
+  border-radius: 8px;
+  touch-action: none;
+}
+.e-results,
+.e-list {
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.e-results li,
+.e-list li {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--line);
+}
+.e-results li span,
+.e-list .qt {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.e-list button,
+.e-results button {
+  padding: 2px 8px;
+  font-size: 12px;
+}
+.gdot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 6px;
+  flex: none;
+  background: #555c6b;
+}
+.gdot.green {
+  background: var(--ok);
+}
+.gdot.yellow {
+  background: var(--warn);
+}
+.gdot.red {
+  background: var(--err);
+}
+
+@media (max-width: 1000px) {
+  .easy-grid {
+    grid-template-columns: 1fr;
+  }
+  .intents {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .g-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* El atributo hidden siempre gana sobre display: grid/flex */
+[hidden] {
+  display: none !important;
+}
+
+/* ---------- Sampler ---------- */
+.sampler-pads .sp-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sampler-pads .sp-head .lbl {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--muted);
+  flex: 1;
+}
+.sampler-pads .sp-vol .knob {
+  width: 44px;
+}
+.sampler-pads .sp-vol .dial {
+  width: 26px;
+  height: 26px;
+}
+.sampler-pads .sp-vol .klabel,
+.sampler-pads .sp-vol .kval {
+  display: none;
+}
+.sp-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
+  margin: 4px 0;
+}
+.sp-grid button {
+  height: 34px;
+  padding: 0;
+  font-size: 17px;
+  background: #22192d;
+  border-color: #4a3360;
+}
+.sp-grid button.empty {
+  opacity: 0.5;
+  border-style: dashed;
+}
+.sp-grid button.on {
+  background: #4a2f6b;
+  border-color: var(--ai);
+  box-shadow: 0 0 10px rgba(184, 140, 255, 0.5);
+}
+.sampler-pads.big .sp-grid button {
+  height: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-size: 24px;
+  border-radius: 12px;
+}
+.sampler-pads.big .nm {
+  font-size: 12px;
+  color: var(--text);
+}
+.sp-hint {
+  font-size: 11px;
+}
+.mixer .sampler-pads {
+  border-top: 1px solid var(--line);
+  padding-top: 8px;
+}
+@media (max-width: 1000px) {
+  .moments {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Monitor MIDI · DJ2GO2</title>
+  </head>
+  <body>
+    <main class="monitor">
+      <div class="toolbar" style="justify-content: space-between">
+        <div>
+          <h1>Monitor MIDI · Numark DJ2GO2</h1>
+          <div class="muted">Tocá cada control del controlador y fijate que se marque en la tabla. Lo marcado con <span class="tag q">?</span> es inferido.</div>
+        </div>
+        <a href="./index.html">← Volver al DJ virtual</a>
+      </div>
+      <div class="banner warn">
+        <b>Cerrá Serato DJ Lite</b> (y cualquier otro programa DJ) antes de usar esta página: en Windows el puerto MIDI del DJ2GO2 lo puede usar un solo programa a la vez. Usá Chrome o Edge.
+      </div>
+      <div id="status"></div>
+      <div class="grid">
+        <section class="panel">
+          <div class="toolbar" style="margin-top: 0">
+            <b>Mapeo esperado</b>
+            <span class="muted small" id="progress"></span>
+            <span style="flex: 1"></span>
+            <button id="led-all">Probar todos los LEDs</button>
+            <button id="led-off">Apagar LEDs</button>
+          </div>
+          <div class="scroll"><table id="map"></table></div>
+        </section>
+        <section class="panel">
+          <div class="toolbar" style="margin-top: 0">
+            <b>Mensajes en vivo</b>
+            <span style="flex: 1"></span>
+            <label class="small"><input type="checkbox" id="hide-jog" /> ocultar jog/encoders</label>
+            <button id="clear">Limpiar</button>
+            <button id="copy" class="primary">Copiar reporte</button>
+          </div>
+          <div class="log panel" id="log" style="padding: 0"></div>
+          <div class="toolbar"><b>Controles vistos que no están en el mapeo</b></div>
+          <table id="unknown"></table>
+        </section>
+      </div>
+    </main>
+    <script type="module" src="/src/monitor.ts"></script>
+  </body>
+</html>

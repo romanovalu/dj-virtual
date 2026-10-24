@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DJ Virtual IA</title>
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <div class="brand">DJ Virtual <span class="ai-tag">IA</span></div>
+        <div id="midi-pill" class="pill"><span class="dot"></span><span class="txt">MIDI…</span></div>
+        <div class="modes" id="modes">
+          <button data-mode="easy" title="Para cualquiera: la IA hace la técnica, vos decidís">🎉 Fácil</button>
+          <button data-mode="learn" title="La IA te enseña qué mover y cuándo">🎓 Aprender</button>
+          <button data-mode="pro" title="Todos los controles">🎛 Pro</button>
+        </div>
+        <div class="spacer"></div>
+        <button id="btn-learn">MIDI Learn</button>
+        <button id="btn-audio">Salidas de audio</button>
+        <a class="btnlink" href="./midi-monitor.html" target="_blank">Monitor MIDI ↗</a>
+      </header>
+      <div id="banners"></div>
+
+      <section id="easy" class="easy" hidden></section>
+      <section id="guide" class="guide panel" hidden></section>
+
+      <main class="console">
+        <section class="deck" data-deck="A"></section>
+        <section class="mixer" id="mixer"></section>
+        <section class="deck" data-deck="B"></section>
+      </main>
+
+      <div class="bottom">
+        <section class="panel library" id="library">
+          <div class="toolbar" style="margin-top: 0">
+            <b>Biblioteca</b>
+            <span class="muted small" id="lib-count"></span>
+            <span class="spacer"></span>
+            <label class="filebtn">+ Archivos<input type="file" id="file-input" accept="audio/*,.mp3,.wav,.flac,.ogg,.m4a,.aac,.aiff" multiple hidden /></label>
+            <input type="url" id="yt-url" placeholder="Link de YouTube (modo básico)" />
+            <button id="yt-add">Agregar</button>
+          </div>
+          <div class="lib-table-wrap">
+            <table id="lib-table"></table>
+            <div id="drop-hint" class="drop-hint">Arrastrá MP3, WAV o FLAC acá (o en cualquier parte de la ventana). Se analizan BPM, beatgrid, tonalidad y energía.</div>
+          </div>
+        </section>
+
+        <section class="panel autodj" id="autodj">
+          <div class="toolbar" style="margin-top: 0">
+            <button id="ad-toggle" class="primary">▶ Auto-DJ</button>
+            <label class="small">Mezcla
+              <select id="ad-bars">
+                <option value="16">16 compases</option>
+                <option value="32">32 compases</option>
+              </select>
+            </label>
+            <label class="small" title="Después de cada mezcla, el tema vuelve de a poco a su BPM original"><input type="checkbox" id="ad-glide" checked /> volver al BPM original</label>
+          </div>
+          <div id="ad-status" class="ad-status">Auto-DJ apagado</div>
+          <div class="mixbar"><div id="ad-progress"></div></div>
+          <div id="ad-owners" class="owners"></div>
+          <div class="toolbar">
+            <b>Cola</b><span class="muted small" id="q-count"></span>
+            <span class="spacer"></span>
+            <button id="q-sort" title="Ordena por BPM, compatibilidad Camelot y curva de energía">✨ Ordenar con IA</button>
+            <button id="q-all">+ Toda la biblioteca</button>
+            <button id="q-clear">Vaciar</button>
+          </div>
+          <ol id="queue" class="queue"></ol>
+          <details>
+            <summary class="muted small">Registro del Auto-DJ</summary>
+            <div id="ad-log" class="ad-log"></div>
+          </details>
+        </section>
+      </div>
+    </div>
+
+    <div id="start-overlay" class="overlay">
+      <div class="panel">
+        <h2>DJ Virtual IA</h2>
+        <p>El navegador necesita un click para activar el audio.</p>
+        <p class="muted small">Usá Chrome o Edge. Si tenés Serato DJ Lite abierto, cerralo: el DJ2GO2 sólo puede estar conectado a un programa a la vez.</p>
+        <button id="start-btn" class="primary big">Activar audio</button>
+      </div>
+    </div>
+
+    <dialog id="dlg-audio">
+      <h3>Salidas de audio</h3>
+      <div id="audio-form"></div>
+      <div class="toolbar"><span class="spacer"></span><button data-close>Cerrar</button></div>
+    </dialog>
+
+    <dialog id="dlg-learn">
+      <h3>MIDI Learn</h3>
+      <p class="muted small">Elegí una acción con <b>Aprender</b> y después tocá el control en el DJ2GO2. Se guarda en este navegador. Las marcadas con <span class="tag q">?</span> son inferidas del archivo de Traktor.</p>
+      <div class="toolbar">
+        <label class="small"><input type="checkbox" id="pitch-invert" /> Invertir pitch fader</label>
+        <span class="spacer"></span>
+        <span class="small muted" id="learn-last"></span>
+        <button id="learn-reset">Restaurar mapeo por defecto</button>
+      </div>
+      <div class="scroll"><table id="learn-table"></table></div>
+      <div class="toolbar"><span class="spacer"></span><button data-close>Cerrar</button></div>
+    </dialog>
+
+    <div id="toasts"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
