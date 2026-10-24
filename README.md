@@ -58,6 +58,8 @@ npm test
 
 `npm run test-tracks` genera temas sintéticos en `test-audio/` (ignorado por git) para probar sin música propia.
 
-## Licencias de dependencias
+## Licencia
 
-essentia.js es **AGPL-3.0** y SoundTouchJS es **LGPL-2.1**. Para uso personal no hay drama; si algún día se distribuye la app, hay que respetar esas licencias.
+Este proyecto es software libre bajo la **GNU AGPL-3.0 o posterior** (ver [LICENSE](LICENSE)): podés usarlo, estudiarlo, modificarlo y compartirlo; si publicás una versión modificada (también como servicio online) tenés que compartir su código con la misma licencia.
+
+Dependencias: essentia.js (**AGPL-3.0**) y SoundTouchJS (**LGPL-2.1**). Los sonidos del sampler se sintetizan en el código, sin audios de terceros.
